@@ -13,8 +13,6 @@ def send_mail(new_ip):
     :param new_ip: 最新的IP地址
     :return:
     """
-    if not path.exists(ip_file_path):
-        yagmail.register(username, password)
     if isinstance(content, str):
         c = content.replace('#{ip}', new_ip)
     elif isinstance(content, list):
@@ -24,8 +22,9 @@ def send_mail(new_ip):
                 c.append(data.replace('#{ip}', new_ip))
     else:
         c = new_ip
-    yagmail.SMTP(user=username, host=host, port=port).send(to, subject, c)
-    print('发送成功')
+    print('开始发送邮件\n')
+    yagmail.SMTP(user=username, password=password, host=host, port=port).send(to, subject, c)
+    print('发送成功\n')
 
 
 def check_ip():
@@ -45,7 +44,7 @@ def check_ip():
                                                                                   'Chrome/42.0.2311.135 '
                                                                                   'Safari/537.36 Edge/12.10240'}).text
     new_ip = re.compile(r'[\n\s\t\r]').sub('', new_ip)
-    print('检测到IP地址是：', new_ip)
+    print('检测到IP地址是：', new_ip, '\n')
     if old_ip != new_ip:
         send_mail(new_ip)
     file = open(ip_file_path, 'w')
