@@ -1,4 +1,4 @@
-FROM python:slim-buster
+FROM python:3.9-slim-buster
 MAINTAINER bluef1ash liangtian_2005@163.com
 ADD . /app
 WORKDIR /app
