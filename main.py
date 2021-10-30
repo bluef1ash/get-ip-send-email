@@ -76,7 +76,7 @@ if __name__ == '__main__':
         content = '变更IP地址为：<span style="color:#FF0000;font-weight:bold;">#{ip}</span>'
     cron = getenv('SEND_EMAIL_CRON')
     if not cron:
-        cron = '* */1 * * *'
+        cron = '* * */1 * *'
     ip_file_path = "./ip.txt"
     scheduler = BlockingScheduler()
     scheduler.add_job(check_ip, CronTrigger.from_crontab(cron))
