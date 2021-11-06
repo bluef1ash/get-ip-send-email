@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 from os import getenv, path
 
 import requests
@@ -44,7 +45,7 @@ def check_ip():
                                                                                   'Chrome/42.0.2311.135 '
                                                                                   'Safari/537.36 Edge/12.10240'}).text
     new_ip = re.compile(r'[\n\s\t\r]').sub('', new_ip)
-    print('检测到IP地址是：', new_ip, '\n')
+    print(datetime.now(), '，检测到IP地址是：', new_ip, '\n')
     if old_ip != new_ip:
         send_mail(new_ip)
     file = open(ip_file_path, 'w')
@@ -74,10 +75,11 @@ if __name__ == '__main__':
     content = getenv('SEND_EMAIL_CONTENT')
     if not content:
         content = '变更IP地址为：<span style="color:#FF0000;font-weight:bold;">#{ip}</span>'
-    cron = getenv('SEND_EMAIL_CRON')
-    if not cron:
-        cron = '* * */1 * *'
-    ip_file_path = "./ip.txt"
+    cron_expression = getenv('SEND_EMAIL_CRON_EXPRESSION')
+    if not cron_expression:
+        cron_expression = '0 */1 * * *'
+    ip_file_path = './ip.txt'
     scheduler = BlockingScheduler()
-    scheduler.add_job(check_ip, CronTrigger.from_crontab(cron))
+    scheduler.add_job(check_ip, CronTrigger.from_crontab(cron_expression, 'Asia/Shanghai'),
+        next_run_time=datetime.now())
     scheduler.start()
