@@ -39,11 +39,11 @@ def check_ip():
         file.close()
     else:
         old_ip = ''
-    new_ip = requests.request('GET', 'http://ip.3322.org', headers={'User-agent': 'Mozilla/5.0 (Windows NT 10.0; '
-                                                                                  'Win64; x64) AppleWebKit/537.36 ('
-                                                                                  'KHTML, like Gecko) '
-                                                                                  'Chrome/42.0.2311.135 '
-                                                                                  'Safari/537.36 Edge/12.10240'}).text
+    new_ip = requests.request('GET', 'https://ip.3322.org', headers={'User-agent': 'Mozilla/5.0 (Windows NT 10.0; '
+                                                                                   'Win64; x64) AppleWebKit/537.36 ('
+                                                                                   'KHTML, like Gecko) '
+                                                                                   'Chrome/42.0.2311.135 '
+                                                                                   'Safari/537.36 Edge/12.10240'}).text
     new_ip = re.compile(r'[\n\s\t\r]').sub('', new_ip)
     print(datetime.now(), '，检测到IP地址是：', new_ip, '\n')
     if old_ip != new_ip:
@@ -81,5 +81,5 @@ if __name__ == '__main__':
     ip_file_path = './ip.txt'
     scheduler = BlockingScheduler()
     scheduler.add_job(check_ip, CronTrigger.from_crontab(cron_expression, 'Asia/Shanghai'),
-        next_run_time=datetime.now())
+                      next_run_time=datetime.now())
     scheduler.start()
