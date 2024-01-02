@@ -79,7 +79,7 @@ if __name__ == '__main__':
     if not cron_expression:
         cron_expression = '0 */1 * * *'
     ip_file_path = './ip.txt'
-    scheduler = BlockingScheduler()
+    scheduler = BlockingScheduler(timezone="Asia/Shanghai")
     scheduler.add_job(check_ip, CronTrigger.from_crontab(cron_expression, 'Asia/Shanghai'),
                       next_run_time=datetime.now())
     scheduler.start()
