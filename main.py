@@ -40,7 +40,7 @@ def check_ip():
         file.close()
     else:
         old_ip = ''
-    new_ip = requests.request('GET', 'https://ip.3322.org', headers={'User-agent': 'Mozilla/5.0 (Windows NT 10.0; '
+    new_ip = requests.request('GET', 'https://ip.3322.net/', headers={'User-agent': 'Mozilla/5.0 (Windows NT 10.0; '
                                                                                    'Win64; x64) AppleWebKit/537.36 ('
                                                                                    'KHTML, like Gecko) '
                                                                                    'Chrome/42.0.2311.135 '
