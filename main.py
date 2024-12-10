@@ -6,6 +6,30 @@ import requests
 import yagmail
 from apscheduler.schedulers.blocking import BlockingScheduler
 from apscheduler.triggers.cron import CronTrigger
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+
+
+def create_session_with_retries(retries=3, backoff_factor=0.3, status_forcelist=(500, 502, 504)):
+    """
+    创建session对象，并设置重试次数
+    :param retries: 重试次数
+    :param backoff_factor: 重试等待时间
+    :param status_forcelist: 状态码列表
+    :return:
+    """
+    session = requests.Session()
+    retry = Retry(
+        total=retries,
+        read=retries,
+        connect=retries,
+        backoff_factor=backoff_factor,
+        status_forcelist=status_forcelist,
+    )
+    adapter = HTTPAdapter(max_retries=retry)
+    session.mount('http://', adapter)
+    session.mount('https://', adapter)
+    return session
 
 
 def send_mail(new_ip):
@@ -25,8 +49,12 @@ def send_mail(new_ip):
         c = new_ip
     print(datetime.now(), '，检测到IP地址是：', new_ip, '\n')
     print('开始发送邮件\n')
-    yagmail.SMTP(user=username, password=password, host=host, port=port).send(to, subject, c)
-    print('发送成功\n')
+    try:
+        yag = yagmail.SMTP(user=username, password=password, host=host, port=port)
+        yag.send(to, subject, c)
+        print('发送成功\n')
+    except Exception as e:
+        print(f'发送失败：{e}\n')
 
 
 def check_ip():
@@ -35,22 +63,26 @@ def check_ip():
     :return:
     """
     if path.exists(ip_file_path):
-        file = open(ip_file_path)
-        old_ip = file.read()
-        file.close()
+        with open(ip_file_path) as file:
+            old_ip = file.read().strip()
     else:
         old_ip = ''
-    new_ip = requests.request('GET', 'https://ip.3322.net/', headers={'User-agent': 'Mozilla/5.0 (Windows NT 10.0; '
+    session = create_session_with_retries()
+    try:
+        response = session.get('https://ip.3322.net/', headers={'User-agent': 'Mozilla/5.0 (Windows NT 10.0; '
                                                                                    'Win64; x64) AppleWebKit/537.36 ('
                                                                                    'KHTML, like Gecko) '
                                                                                    'Chrome/42.0.2311.135 '
-                                                                                   'Safari/537.36 Edge/12.10240'}).text
-    new_ip = re.compile(r'[\n\s\t\r]').sub('', new_ip)
+                                                                                   'Safari/537.36 Edge/12.10240'})
+        response.raise_for_status()
+        new_ip = re.compile(r'\s').sub('', response.text)
+    except requests.RequestException as e:
+        print(f'获取IP地址失败：{e}\n')
+        return
     if old_ip != new_ip:
         send_mail(new_ip)
-    file = open(ip_file_path, 'w')
-    file.write(new_ip)
-    file.close()
+    with open(ip_file_path, 'w') as file:
+        file.write(new_ip)
 
 
 if __name__ == '__main__':

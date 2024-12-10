@@ -10,3 +10,16 @@ Vagrantfile
 .git
 .idea
 .github
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*.egg-info
+*.egg
+*.log
+*.swp
+*.swo
+*.swn
+*.bak
+*.tmp
+*.lock
